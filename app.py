@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import shutil
 import subprocess
@@ -19,11 +19,11 @@ MODEL_FILENAME = "best.pt"
 OUTPUT_ROOT = Path("runs") / "streamlit_outputs"
 IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "bmp", "webp"}
 VIDEO_EXTENSIONS = {"mp4", "avi", "mov", "mkv", "webm"}
-CLASS_LABELS = {"gun": "Silah", "knife": "Bıçak"}
+CLASS_LABELS = {"gun": "Silah", "knife": "BÄ±Ã§ak"}
 
 
 st.set_page_config(
-    page_title="Silah ve Bıçak Tespiti",
+    page_title="Silah ve BÄ±Ã§ak Tespiti",
     layout="wide",
 )
 
@@ -84,7 +84,7 @@ def render_detection_table(detections: list[dict[str, str | float]]) -> None:
         "<div class='det-panel-title'>Tespit Edilen Nesneler</div>"
         "<table class='det-table'>"
         "<thead><tr>"
-        "<th>No</th><th>Sınıf</th><th>Güven</th><th>x1</th><th>y1</th><th>x2</th><th>y2</th>"
+        "<th>No</th><th>SÄ±nÄ±f</th><th>GÃ¼ven</th><th>x1</th><th>y1</th><th>x2</th><th>y2</th>"
         "</tr></thead>"
         f"<tbody>{''.join(rows_html)}</tbody>"
         "</table>"
@@ -102,12 +102,12 @@ def render_class_count_cards(class_counts: dict[str, int]) -> None:
             <div class="class-card">
                 <div class="class-card-label">Silah</div>
                 <div class="class-card-value">{gun_count}</div>
-                <div class="class-card-caption">gun sınıfı</div>
+                <div class="class-card-caption">gun sÄ±nÄ±fÄ±</div>
             </div>
             <div class="class-card">
-                <div class="class-card-label">Bıçak</div>
+                <div class="class-card-label">BÄ±Ã§ak</div>
                 <div class="class-card-value">{knife_count}</div>
-                <div class="class-card-caption">knife sınıfı</div>
+                <div class="class-card-caption">knife sÄ±nÄ±fÄ±</div>
             </div>
         </div>
         """,
@@ -231,6 +231,16 @@ def render_css() -> None:
                 font-size: 0.84rem;
                 margin-top: 6px;
             }
+            div[data-testid="stImage"] {
+                min-height: 320px;
+            }
+            div[data-testid="stImage"] img {
+                display: block;
+                width: 100%;
+                max-height: 72vh;
+                object-fit: contain;
+                border-radius: 8px;
+            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -242,7 +252,7 @@ def run_image_detection(model: YOLO, image: Image.Image, confidence: float, iou:
     left, right = st.columns(2)
 
     with left:
-        st.subheader("Yüklenen Görsel")
+        st.subheader("YÃ¼klenen GÃ¶rsel")
         st.image(image, width="stretch")
 
     start_time = time.perf_counter()
@@ -264,16 +274,16 @@ def run_image_detection(model: YOLO, image: Image.Image, confidence: float, iou:
         st.subheader("Tespit Sonucu")
         st.image(plotted_rgb, width="stretch")
 
-    st.subheader("Görsel Tespit Özeti")
+    st.subheader("GÃ¶rsel Tespit Ã–zeti")
     col_a, col_b, col_c = st.columns(3)
-    col_a.metric("Tespit sayısı", len(detections))
-    col_b.metric("Çıkarım süresi", f"{elapsed_ms:.1f} ms")
-    col_c.metric("Güven eşiği", f"{confidence:.2f}")
+    col_a.metric("Tespit sayÄ±sÄ±", len(detections))
+    col_b.metric("Ã‡Ä±karÄ±m sÃ¼resi", f"{elapsed_ms:.1f} ms")
+    col_c.metric("GÃ¼ven eÅŸiÄŸi", f"{confidence:.2f}")
 
     if detections:
         render_detection_table(detections)
     else:
-        st.warning("Seçilen güven eşiğinde tespit bulunamadı.")
+        st.warning("SeÃ§ilen gÃ¼ven eÅŸiÄŸinde tespit bulunamadÄ±.")
 
 
 def get_ffmpeg_path() -> str | None:
@@ -349,7 +359,7 @@ def process_video(
 
     capture = cv2.VideoCapture(str(source_path))
     if not capture.isOpened():
-        raise RuntimeError("Video dosyası açılamadı.")
+        raise RuntimeError("Video dosyasÄ± aÃ§Ä±lamadÄ±.")
 
     fps = capture.get(cv2.CAP_PROP_FPS) or 25.0
     width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -366,9 +376,9 @@ def process_video(
     )
     if not writer.isOpened():
         capture.release()
-        raise RuntimeError("Tespit videosu oluşturulamadı.")
+        raise RuntimeError("Tespit videosu oluÅŸturulamadÄ±.")
 
-    progress = st.progress(0, text="Video işleniyor...")
+    progress = st.progress(0, text="Video iÅŸleniyor...")
     status = st.empty()
     class_counts: dict[str, int] = {}
     max_confidence = 0.0
@@ -413,13 +423,13 @@ def process_video(
                 progress_value = min(written_frames / max_frames, 1.0)
             else:
                 progress_value = 0.0
-            progress.progress(progress_value, text="Video işleniyor...")
-            status.caption(f"Okunan kare: {processed_frames} | Yazılan kare: {written_frames}")
+            progress.progress(progress_value, text="Video iÅŸleniyor...")
+            status.caption(f"Okunan kare: {processed_frames} | YazÄ±lan kare: {written_frames}")
     finally:
         capture.release()
         writer.release()
 
-    progress.progress(1.0, text="Video işleme tamamlandı.")
+    progress.progress(1.0, text="Video iÅŸleme tamamlandÄ±.")
     elapsed_seconds = time.perf_counter() - start_time
 
     return {
@@ -465,11 +475,11 @@ def run_video_detection(
 
     left, right = st.columns(2)
     with left:
-        st.subheader("Yüklenen Video")
+        st.subheader("YÃ¼klenen Video")
         st.video(source_path.read_bytes())
 
     if summary is None:
-        with st.spinner("Video üzerinde tespit yapılıyor..."):
+        with st.spinner("Video Ã¼zerinde tespit yapÄ±lÄ±yor..."):
             summary = process_video(
                 model=model,
                 source_path=source_path,
@@ -489,7 +499,7 @@ def run_video_detection(
             "summary": summary,
         }
     else:
-        st.info("Video veya ayarlar değişmediği için önceki tespit sonucu kullanılıyor.")
+        st.info("Video veya ayarlar deÄŸiÅŸmediÄŸi iÃ§in Ã¶nceki tespit sonucu kullanÄ±lÄ±yor.")
 
     output_path = Path(summary["output_path"])
     display_path = Path(display_path)
@@ -497,22 +507,22 @@ def run_video_detection(
         st.subheader("Tespit Videosu")
         st.video(display_path.read_bytes(), format="video/mp4")
         if display_path == output_path:
-            st.caption("Önizleme boş kalırsa aşağıdaki indirme butonunu kullanabilirsin. Video dosyası yine kaydedilir.")
+            st.caption("Ã–nizleme boÅŸ kalÄ±rsa aÅŸaÄŸÄ±daki indirme butonunu kullanabilirsin. Video dosyasÄ± yine kaydedilir.")
 
-    st.subheader("Video Tespit Özeti")
+    st.subheader("Video Tespit Ã–zeti")
     class_counts = summary["class_counts"]
     frame_level_detections = sum(class_counts.values())
     col_a, col_b, col_c, col_d = st.columns(4)
-    col_a.metric("Kare bazlı toplam tespit", frame_level_detections)
-    col_b.metric("İşlenen kare", summary["written_frames"])
-    col_c.metric("İşlem süresi", f"{summary['elapsed_seconds']:.1f} s")
-    col_d.metric("En yüksek güven", f"{summary['max_confidence']:.2%}")
+    col_a.metric("Kare bazlÄ± toplam tespit", frame_level_detections)
+    col_b.metric("Ä°ÅŸlenen kare", summary["written_frames"])
+    col_c.metric("Ä°ÅŸlem sÃ¼resi", f"{summary['elapsed_seconds']:.1f} s")
+    col_d.metric("En yÃ¼ksek gÃ¼ven", f"{summary['max_confidence']:.2%}")
 
     if class_counts:
         render_class_count_cards(class_counts)
-        st.caption("Not: Video tespit sayıları kare bazlıdır; aynı nesne farklı karelerde tekrar sayılabilir.")
+        st.caption("Not: Video tespit sayÄ±larÄ± kare bazlÄ±dÄ±r; aynÄ± nesne farklÄ± karelerde tekrar sayÄ±labilir.")
     else:
-        st.warning("İşlenen video karelerinde tespit bulunamadı.")
+        st.warning("Ä°ÅŸlenen video karelerinde tespit bulunamadÄ±.")
 
     with open(display_path, "rb") as video_file:
         st.download_button(
@@ -524,12 +534,12 @@ def run_video_detection(
 
     st.caption(f"Tespit videosu kaydedildi: {output_path}")
     if display_path != output_path:
-        st.caption(f"Tarayıcı uyumlu önizleme videosu: {display_path}")
+        st.caption(f"TarayÄ±cÄ± uyumlu Ã¶nizleme videosu: {display_path}")
 
 
 def main() -> None:
     render_css()
-    st.title("Silah ve Bıçak Tespiti")
+    st.title("Silah ve BÄ±Ã§ak Tespiti")
 
     with st.sidebar:
         st.header("Model")
@@ -543,45 +553,46 @@ def main() -> None:
             unsafe_allow_html=True,
         )
 
-        confidence = st.slider("Güven eşiği", 0.05, 0.95, 0.25, 0.05)
-        iou = st.slider("IoU eşiği", 0.10, 0.90, 0.45, 0.05)
-        image_size = st.selectbox("Görüntü boyutu", [416, 512, 640, 768], index=2)
+        confidence = st.slider("GÃ¼ven eÅŸiÄŸi", 0.05, 0.95, 0.25, 0.05)
+        iou = st.slider("IoU eÅŸiÄŸi", 0.10, 0.90, 0.45, 0.05)
+        image_size = st.selectbox("GÃ¶rÃ¼ntÃ¼ boyutu", [416, 512, 640, 768], index=2)
 
         st.divider()
         st.header("Video")
-        frame_stride = st.selectbox("Kare atlama aralığı", [1, 2, 3, 5], index=0)
-        max_frames = st.number_input("Maksimum işlenecek kare (0 = tümü)", min_value=0, value=0, step=50)
+        frame_stride = st.selectbox("Kare atlama araligi", [1, 2, 3, 5, 10], index=3)
+        max_frames = st.number_input("Maksimum islenecek kare (0 = tumu)", min_value=0, value=300, step=50)
+        st.caption("Hugging Face CPU demosu icin varsayilan video ayarlari hizli moda alinmistir. Tum videoyu islemek icin kare atlama araligini 1, maksimum kare degerini 0 yapabilirsin.")
 
         st.divider()
         st.caption("Final YOLO11n model metrikleri")
         st.metric("mAP50", "0.964")
         st.metric("mAP50-95", "0.698")
-        st.metric("Sınıflar", "gun, knife")
+        st.metric("SÄ±nÄ±flar", "gun, knife")
 
     model = load_model()
 
-    image_tab, video_tab = st.tabs(["Görsel Tespiti", "Video Tespiti"])
+    image_tab, video_tab = st.tabs(["GÃ¶rsel Tespiti", "Video Tespiti"])
 
     with image_tab:
         uploaded_image = st.file_uploader(
-            "Tespit yapmak için bir görsel yükle",
+            "Tespit yapmak iÃ§in bir gÃ¶rsel yÃ¼kle",
             type=sorted(IMAGE_EXTENSIONS),
             key="image_uploader",
         )
         if uploaded_image is None:
-            st.info("Görsel tespiti için bir dosya yükle.")
+            st.info("GÃ¶rsel tespiti iÃ§in bir dosya yÃ¼kle.")
         else:
             image = Image.open(uploaded_image).convert("RGB")
             run_image_detection(model, image, confidence, iou, image_size)
 
     with video_tab:
         uploaded_video = st.file_uploader(
-            "Tespit yapmak için bir video yükle",
+            "Tespit yapmak iÃ§in bir video yÃ¼kle",
             type=sorted(VIDEO_EXTENSIONS),
             key="video_uploader",
         )
         if uploaded_video is None:
-            st.info("Video tespiti için bir dosya yükle.")
+            st.info("Video tespiti iÃ§in bir dosya yÃ¼kle.")
         else:
             video_size = getattr(uploaded_video, "size", len(uploaded_video.getbuffer()))
             video_cache_key = (
@@ -609,3 +620,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
