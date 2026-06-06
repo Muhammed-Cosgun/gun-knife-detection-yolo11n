@@ -1,5 +1,6 @@
 ﻿from __future__ import annotations
 
+import base64
 import os
 import shutil
 import subprocess
@@ -162,11 +163,25 @@ def render_css() -> None:
                 font-weight: 800;
                 line-height: 1.1;
             }
-            .stable-media img, .stable-media video {
+            .image-frame {
                 width: 100%;
-                max-height: 70vh;
-                object-fit: contain;
+                height: min(70vh, 620px);
+                min-height: 360px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
                 border-radius: 8px;
+                background: rgba(15, 23, 42, 0.35);
+                border: 1px solid rgba(148, 163, 184, 0.18);
+            }
+            .image-frame img {
+                display: block;
+                max-width: 100%;
+                max-height: 100%;
+                width: auto;
+                height: auto;
+                object-fit: contain;
             }
         </style>
         """,
@@ -396,14 +411,29 @@ def process_video(
     }
 
 
+
+def render_stable_image(image_path: str | Path, alt_text: str) -> None:
+    path = Path(image_path)
+    suffix = path.suffix.lower()
+    mime_type = "image/png" if suffix == ".png" else "image/jpeg"
+    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+    safe_alt = escape(alt_text)
+    st.markdown(
+        f"""
+        <div class="image-frame">
+            <img src="data:{mime_type};base64,{encoded}" alt="{safe_alt}" />
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 def show_image_result(result: dict[str, object], confidence: float) -> None:
     left, right = st.columns(2)
     with left:
         st.subheader("Yuklenen Gorsel")
-        st.image(str(result["input_path"]), width="stretch")
+        render_stable_image(result["input_path"], "Yuklenen gorsel")
     with right:
         st.subheader("Tespit Sonucu")
-        st.image(str(result["output_path"]), width="stretch")
+        render_stable_image(result["output_path"], "Tespit sonucu")
 
     detections = result["detections"]
     st.subheader("Gorsel Tespit Ozeti")
@@ -548,3 +578,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
