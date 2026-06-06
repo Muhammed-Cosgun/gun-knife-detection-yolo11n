@@ -11,6 +11,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import streamlit as st
+import streamlit.components.v1 as components
 from huggingface_hub import hf_hub_download
 from PIL import Image
 from ultralytics import YOLO
@@ -412,28 +413,87 @@ def process_video(
 
 
 
-def render_stable_image(image_path: str | Path, alt_text: str) -> None:
+def image_to_data_uri(image_path: str | Path) -> str:
     path = Path(image_path)
     suffix = path.suffix.lower()
     mime_type = "image/png" if suffix == ".png" else "image/jpeg"
     encoded = base64.b64encode(path.read_bytes()).decode("ascii")
-    safe_alt = escape(alt_text)
-    st.markdown(
-        f"""
-        <div class="image-frame">
-            <img src="data:{mime_type};base64,{encoded}" alt="{safe_alt}" />
+    return f"data:{mime_type};base64,{encoded}"
+
+
+def render_image_pair(input_path: str | Path, output_path: str | Path) -> None:
+    input_uri = image_to_data_uri(input_path)
+    output_uri = image_to_data_uri(output_path)
+    html = f"""
+    <!doctype html>
+    <html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            html, body {{
+                margin: 0;
+                padding: 0;
+                background: transparent;
+                overflow: hidden;
+                font-family: Arial, sans-serif;
+            }}
+            .grid {{
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                width: 100%;
+            }}
+            .title {{
+                color: #f8fafc;
+                font-size: 24px;
+                line-height: 1.2;
+                font-weight: 800;
+                margin: 0 0 12px 0;
+            }}
+            .frame {{
+                height: 560px;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                border-radius: 8px;
+                background: rgba(15, 23, 42, 0.35);
+                border: 1px solid rgba(148, 163, 184, 0.18);
+                box-sizing: border-box;
+            }}
+            img {{
+                display: block;
+                max-width: 100%;
+                max-height: 100%;
+                width: auto;
+                height: auto;
+                object-fit: contain;
+            }}
+            @media (max-width: 900px) {{
+                .grid {{ grid-template-columns: 1fr; }}
+                .frame {{ height: 420px; }}
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="grid">
+            <section>
+                <h3 class="title">Yuklenen Gorsel</h3>
+                <div class="frame"><img src="{input_uri}" alt="Yuklenen gorsel" /></div>
+            </section>
+            <section>
+                <h3 class="title">Tespit Sonucu</h3>
+                <div class="frame"><img src="{output_uri}" alt="Tespit sonucu" /></div>
+            </section>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </body>
+    </html>
+    """
+    components.html(html, height=620, scrolling=False)
+
 def show_image_result(result: dict[str, object], confidence: float) -> None:
-    left, right = st.columns(2)
-    with left:
-        st.subheader("Yuklenen Gorsel")
-        render_stable_image(result["input_path"], "Yuklenen gorsel")
-    with right:
-        st.subheader("Tespit Sonucu")
-        render_stable_image(result["output_path"], "Tespit sonucu")
+    render_image_pair(result["input_path"], result["output_path"])
 
     detections = result["detections"]
     st.subheader("Gorsel Tespit Ozeti")
@@ -578,4 +638,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
