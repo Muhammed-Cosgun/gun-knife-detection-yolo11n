@@ -4,7 +4,7 @@ This repository contains a real-time dangerous object detection application deve
 
 ## 🚀 Live Demo
 You can try the live interactive web application directly on Hugging Face Spaces:
-👉 [Click here to view the Live Demo](https://huggingface.co)
+👉 [Click here to view the Live Demo](https://huggingface.co/spaces/cosgun99/gun-knife-detection-yolo11n)
 
 ## 🛠️ Tech Stack & Architecture
 * **Model:** YOLO11n (Ultralytics)
@@ -18,7 +18,7 @@ If you want to run this project on your local machine, follow these simple steps
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com
+   git clone https://github.com/Muhammed-Cosgun/gun-knife-detection-yolo11n.git
    cd gun-knife-detection-yolo11n
    ```
 
